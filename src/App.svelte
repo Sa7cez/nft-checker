@@ -8,6 +8,7 @@
   let checked = ''
   let empty = ''
   let total = 0
+  let stats:any = {}
 
   const sleep = async (time: number) => new Promise((resolve) => setTimeout(() => resolve(true), time))
 
@@ -43,7 +44,11 @@
       const tokens = await getUserTokens(address as string)
 
       if (tokens.length > 0)
-        checked += `${address}: ${tokens.length} NFTs : ${tokens.map((i: any) => `${i.token.tokenId} ${i.token.name}`).join(', ')}\n`
+        checked += `${address}: ${tokens.length} NFTs : ${tokens.map((i: any) => {
+          if (!stats[i.token.name]) stats[i.token.name] = 1
+          else stats[i.token.name]++
+          return `${i.token.tokenId} ${i.token.name}`
+        }).join(', ')}\n`
       else
         empty += `${address}\n`
 
@@ -91,6 +96,10 @@
   {#if total >0}
   <div>
     <p>Total NFTs count: {total}</p>
+    <p>{#each Object.entries(stats) as [key, value]}
+      {key}: {value}<br>
+    {/each}
+    </p>
   </div>
   {/if}
 
