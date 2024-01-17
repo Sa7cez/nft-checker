@@ -16,7 +16,7 @@
     empty = ''
     total = 0
     const getUserTokens = async (address: string) : Promise<any> =>
-      axios.get(`${server}/users/${address}/tokens/v9?collection=${collection}`)
+      axios.get(`${server}/users/${address}/tokens/v9?collection=${collection}&limit=200`)
         .then(({ data }: any) => {
           if (data.tokens.length > 0) {
             checked += `${address}: ${data.tokens.length} NFTs : ${data.tokens.map((i: any) => `${i.token.tokenId} ${i.token.name}`).join(', ')}\n`
