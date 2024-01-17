@@ -7,17 +7,20 @@
 
   let checked = ''
   let empty = ''
+  let total = 0
 
   const sleep = async (time: number) => new Promise((resolve) => setTimeout(() => resolve(true), time))
 
   const check = async () => {
     checked = ''
     empty = ''
+    total = 0
     const getUserTokens = async (address: string) : Promise<any> =>
       axios.get(`${server}/users/${address}/tokens/v9?collection=${collection}`)
         .then(({ data }: any) => {
           if (data.tokens.length > 0) {
-            checked += `${address}: ${data.tokens.map((i: any) => `${i.token.tokenId} ${i.token.name}`)}\n`
+            checked += `${address}: ${data.tokens.length} NFTs : ${data.tokens.map((i: any) => `${i.token.tokenId} ${i.token.name}`).join(', ')}\n`
+            total += data.tokens.length
           } else {
             empty += `${address}\n`
             console.log(address, `doesn't have NFT`)
@@ -57,7 +60,7 @@
     <textarea placeholder="Your wallets here...." bind:value={addresses}  rows="10"></textarea>
   </div>
 
-  <div class="card">
+  <div>
     <button on:click={check}>NFT Token & Name Check!</button>
   </div>
 
@@ -75,22 +78,23 @@
   </div>
   {/if}
 
+  {#if total >0}
+  <div>
+    <p>Total NFTs count: {total}</p>
+  </div>
+  {/if}
+
 </main>
 
 <style>
   input,
-  textarea {
-    width: 100%;
-    margin: 0.5rem;
-  }
-  .card {
-    margin: 0.5rem;
-  }
+  textarea,
   button {
     width: 100%;
-    margin: 0;
+    margin: 0.5rem auto 1rem;
   }
   label {
     display: block;
+    text-align: left;
   }
 </style>
