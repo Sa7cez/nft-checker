@@ -15,17 +15,20 @@
     checked = ''
     empty = ''
     total = 0
-    const getUserTokens = async (address: string) : Promise<any> =>
-      axios.get(`${server}/users/${address}/tokens/v9?collection=${collection}&limit=200`)
-        .then(({ data }: any) => {
+    const getUserTokens = async (address: string, continuation = null, tokens = []) : Promise<any> =>
+      axios.get(`${server}/users/${address}/tokens/v9?collection=${collection}&limit=200${continuation ? `&continuation=${continuation}` : ''}`)
+        .then(async ({ data }: any) => {
           if (data.tokens.length > 0) {
-            checked += `${address}: ${data.tokens.length} NFTs : ${data.tokens.map((i: any) => `${i.token.tokenId} ${i.token.name}`).join(', ')}\n`
-            total += data.tokens.length
+            tokens = tokens.concat(data.tokens)
+            if (data.continuation)
+              return getUserTokens(address, data.continuation, tokens)
+
           } else {
             empty += `${address}\n`
             console.log(address, `doesn't have NFT`)
             addresses = forCheck.join('\n')
           }
+          return tokens
         })
         .catch(async (err: any) => {
           console.error(err.message)
@@ -37,7 +40,14 @@
     console.log(forCheck)
     while (forCheck.length > 0) {
       const address = forCheck.pop()
-      await getUserTokens(address as string)
+      const tokens = await getUserTokens(address as string)
+
+      if (tokens.length > 0)
+        checked += `${address}: ${tokens.length} NFTs : ${tokens.map((i: any) => `${i.token.tokenId} ${i.token.name}`).join(', ')}\n`
+      else
+        empty += `${address}\n`
+
+      total += tokens.length
     }
   }
   
